@@ -5,6 +5,9 @@ from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
 import pyqtgraph as pg
 
+from moed.model import Model
+from moed.io import IO
+
 def window():
     app = QApplication(sys.argv)
 
@@ -18,22 +21,21 @@ def window():
     x = range(1, 1001, 1)
     a = 0.5
     b = 3
-    y1 = [a*t + b for t in x]
+    alpha = 0.005
+    beta = 1
+
+    y1 = Model.linear(x, a, b)
     p1 = win.addPlot(title="1", y=y1)
 
-    a = -a
-    y2 = [a*t + b for t in x]
+    y2 = Model.linear(x, -a, b)
     p2 = win.addPlot(title="2", y=y2)
 
     win.nextRow()
 
-    alpha = 0.005
-    beta = 1
-    y3 = [beta * math.e ** (alpha * t) for t in x]
+    y3 = Model.exponential(x, alpha, beta)
     p3 = win.addPlot(title="3", y=y3)
 
-    alpha = -alpha
-    y4 = [beta * math.e ** (alpha * t) for t in x]
+    y4 = Model.exponential(x, -alpha, beta)
     p4 = win.addPlot(title="4", y=y4)
 
     win.nextRow()
