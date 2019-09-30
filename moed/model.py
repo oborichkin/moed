@@ -1,5 +1,6 @@
 import math
 
+
 class Model:
 
     @staticmethod
@@ -9,4 +10,3 @@ class Model:
     @staticmethod
     def exponential(range_, alpha=1, beta=1):
         return [beta * math.e ** (alpha * x) for x in range_]
-    
