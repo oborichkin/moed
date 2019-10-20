@@ -1,6 +1,8 @@
 import math
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
+
 
 class Model:
 
@@ -18,13 +20,17 @@ class Sequence:
     def __init__(self):
         self._seq = OrderedDict()
     
+    def plot(self):
+        plt.plot(self.x, self.y)
+        plt.show()
+    
     @property
     def x(self):
-        return self._seq.keys()
+        return list(self._seq.keys())
     
     @property
     def y(self):
-        return self._seq.values()
+        return list(self._seq.values())
 
     @staticmethod
     def from_func(x_range, f):
