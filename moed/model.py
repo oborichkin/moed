@@ -13,6 +13,10 @@ class Model:
     @staticmethod
     def exponential(range_, alpha=1, beta=1):
         return Sequence.from_func(range_, lambda x: beta * math.e ** (alpha * x))
+    
+    @staticmethod
+    def harmonic(range_, amp=1, freq=1):
+        return Sequence.from_func(range_, lambda x: math.sin(x * freq) * amp)
 
 
 class Sequence:
@@ -21,6 +25,7 @@ class Sequence:
         self._seq = OrderedDict()
     
     def plot(self):
+        plt.figure(figsize=(15, 5))
         plt.plot(self.x, self.y)
         plt.show()
     
@@ -49,7 +54,8 @@ class Sequence:
 
     def __add__(self, other):
         res = Sequence()
-        keys = set(self.x).union(other.x)
+        keys = list(set(self.x).union(other.x))
+        keys.sort()
         for x in keys:
             res._seq[x] = 0
             if x in self.x:
@@ -60,7 +66,8 @@ class Sequence:
     
     def __mul__(self, other):
         res = Sequence()
-        keys = set(self.x).union(other.x)
+        keys = list(set(self.x).union(other.x))
+        keys.sort()
         for x in keys:
             res._seq[x] = 1
             if x in self.x:
@@ -68,3 +75,6 @@ class Sequence:
             if x in other.x:
                 res._seq[x] *= other._seq[x]
         return res
+    
+    def __truediv__(self, other):
+        return Sequence.from_func(self.x, lambda x: self._seq[x] / other)
