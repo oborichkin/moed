@@ -51,6 +51,9 @@ class Sequence:
             res._seq = ordered_dict.copy()
             return res
         raise ValueError("Dictionary must be OrderedDict")
+    
+    def __len__(self):
+        return len(self._seq)
 
     def __add__(self, other):
         res = Sequence()
@@ -75,6 +78,12 @@ class Sequence:
             if x in other.x:
                 res._seq[x] *= other._seq[x]
         return res
+    
+    def __sub__(self, other):
+        if isinstance(other, int):
+            return Sequence().from_func(self.x, lambda x: self._seq[x] - other)
+        else:
+            raise ValueError("Operand of this types is not supported")
     
     def __truediv__(self, other):
         return Sequence.from_func(self.x, lambda x: self._seq[x] / other)
