@@ -1,9 +1,69 @@
 import time
 import copy
+import math
 from collections import OrderedDict
 
 from moed.analysis import Analysis
 from moed.model import Sequence
+
+
+class Filter:
+
+    P310_WINDOW = (0.35577019, 0.24369830, 0.07211497, 0.00630165)
+
+    @staticmethod
+    def low_pass_filter(size, dt, fc):
+        half = Filter._half_filter(size, dt, fc)
+        result = [*list(reversed(half)), *half[1:]]
+        return Sequence.from_func(range(2*size+1), lambda x: result[x])
+    
+    @staticmethod
+    def high_cut_filter(size, dt, fc):
+        return Filter.low_pass_filter(size, dt, fc)
+
+    @staticmethod
+    def high_pass_filter(size, dt, fc):
+        lpf = Filter.low_pass_filter(size, dt, fc)
+        lpw = lpf.y
+        hpf = []
+        for i in range(2*size+1):
+            if i == size:
+                hpf.append(1 - lpw[i])
+            else:
+                hpf.append(-lpw[i])
+        return Sequence.from_func(range(2*size+1), lambda x: hpf[x])
+    
+    @staticmethod
+    def low_cut_filter(size, dt, fc):
+        return high_pass_filter(size, dt, fc)
+    
+    @staticmethod
+    def band_pass_filter(size, dt, fc):
+        pass
+    
+    @staticmethod
+    def _half_filter(size, dt, fc):
+        lpw = []
+        # Straight part
+        arg = 2 * fc * dt
+        lpw.append(arg)
+        arg *= math.pi
+        for i in range(1, size+1):
+            lpw.append(math.sin(arg * i) / (math.pi * i))
+        # Trapezoid
+        lpw[size] /= 2
+        # Appliement of smoothing window
+        sumg = lpw[0]
+        for i in range(1, size+1):
+            sum_ = Filter.P310_WINDOW[0]
+            arg = (math.pi * i) / size
+            for k in range(1, 4):
+                sum_ +=  2 * Filter.P310_WINDOW[k] * math.cos(arg * k)
+        # Normalization
+        for i in range(size+1):
+            lpw[i] /= sumg
+        
+        return lpw
 
 
 class Proc:
