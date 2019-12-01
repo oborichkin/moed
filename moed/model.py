@@ -15,8 +15,8 @@ class Model:
         return Sequence.from_func(range_, lambda x: beta * math.e ** (alpha * x))
     
     @staticmethod
-    def harmonic(range_, amp=1, freq=1):
-        return Sequence.from_func(range_, lambda x: math.sin(x * freq) * amp)
+    def harmonic(range_, amp=1, freq=1, phase=0):
+        return Sequence.from_func(range_, lambda x: math.sin(2 * math.pi * x * freq + phase) * amp)
 
 
 class Sequence:
@@ -80,8 +80,10 @@ class Sequence:
         return res
     
     def __sub__(self, other):
-        if isinstance(other, int):
+        if isinstance(other, int) or isinstance(other, float):
             return Sequence().from_func(self.x, lambda x: self._seq[x] - other)
+        if isinstance(other, Sequence):
+            return Sequence.from_func(self.x, lambda x: self._seq[x] - other._seq[x])
         else:
             raise ValueError("Operand of this types is not supported")
     

@@ -1,5 +1,10 @@
 import time
 import copy
+from collections import OrderedDict
+
+from moed.analysis import Analysis
+from moed.model import Sequence
+
 
 class Proc:
 
@@ -15,7 +20,27 @@ class Proc:
         for i in range(m):
             res[int(Proc.my_random(end=len(N)))] *= S
         return res
+
+    @staticmethod
+    def unshift(seq):
+        res = copy.deepcopy(seq)
+        return res - Analysis.avg(res)    
+
+    @staticmethod
+    def unspike(seq, clamp):
+        res = copy.deepcopy(seq)
+        for i in range(1,len(res)-1):
+            if abs(res.y[i]) > clamp:
+                res._seq[res.x[i]] = (res.y[i-1] + res.y[i+1]) / 2
+        return res
     
+    @staticmethod
+    def untrend(seq, window_size=5):
+        res = OrderedDict()
+        for idx, x in enumerate(seq.x):
+            res[x] = Analysis.avg(seq, max(0, idx-window_size), min(len(seq)-1, idx+window_size))
+        return seq - Sequence.from_dict(res)
+
     @staticmethod
     def my_random(start=0, end=1):
         s = ""
@@ -33,11 +58,3 @@ class Proc:
     @staticmethod
     def _random():
         return int(time.time() * 10000) % 2
-
-# if __name__ == "__main__":
-#     import random
-#     r = 1000
-#     first = [random.randint(0,1) for x in range(r)]
-#     second = [Proc._random2() for x in range(r)]
-#     print(first.count(1))
-#     print(second.count(1))
