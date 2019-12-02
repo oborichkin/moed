@@ -88,3 +88,8 @@ class Sequence:
     
     def __truediv__(self, other):
         return Sequence.from_func(self.x, lambda x: self._seq[x] / other)
+    
+    def hamming(self, alpha=0.46):
+        size = len(self)
+        y = self.y
+        return Sequence.from_func(range(size), lambda x: y[x] * (alpha  - (1 - alpha) * math.cos(2 * math.pi * x / size)))

@@ -76,12 +76,13 @@ class Analysis:
         avg = Analysis.avg(seq, start=start, end=end)
         var = Analysis.var(seq, start=start, end=end)
         res = OrderedDict()
+        y = seq.y
         if not end:
             end = len(seq._seq)
         for shift in range(start, end):
             res[shift - start] = sum(
                 [
-                    (seq.y[x] - avg) * (seq.y[x + shift] - avg)
+                    (y[x] - avg) * (y[x + shift] - avg)
                     for x in range(0, end - shift)
                 ]
             ) / var
@@ -108,10 +109,12 @@ class Analysis:
         div = math.sqrt(Analysis.var(first) + Analysis.var(second))
 
         res = []
+        f_y = first.y
+        s_y = second.y
         for shift in range(len(first)):
             res.append(
                 sum([   
-                    (first.y[k] - first_avg) * (second.y[k + shift] - second_avg)
+                    (f_y[k] - first_avg) * (s_y[k + shift] - second_avg)
                     for k in range(len(first) - shift)
                 ]
             ) / div
@@ -151,3 +154,36 @@ class Analysis:
             res.append(math.sqrt((Re / n) ** 2 + (Im / n) ** 2))
         
         return Sequence.from_dict(OrderedDict(zip(seq.x[:n//2:], res[:n//2])))
+    
+    @staticmethod
+    def dft(seq):
+        return Analysis.dtf(seq)
+    
+    @staticmethod
+    def dft_complex(seq):
+        res = []
+        n = len(seq)
+        y = seq.y
+        for k in range(n):
+            Re = 0
+            Im = 0
+            for t in range(n):
+                angle = 2 * math.pi * t * k / n
+                Re += y[t] * math.cos(angle)
+                Im += y[t] * math.sin(angle)
+            res.append((Re / n, Im / n))
+        return res
+
+
+    @staticmethod
+    def idft(complex_pairs):
+        res = []
+        n = len(complex_pairs)
+        for k in range(n):
+            sum = 0
+            for t in range(n):
+                angle = (2 * math.pi * k * t) / n
+                sum += complex_pairs[t][0] * math.cos(angle) + complex_pairs[t][1] * math.sin(angle)
+            res.append(sum)
+        return Sequence.from_func(range(n), lambda x: res[x])
+
