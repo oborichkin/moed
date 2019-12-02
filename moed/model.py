@@ -3,7 +3,6 @@ from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 
-
 class Model:
 
     @staticmethod

@@ -119,6 +119,24 @@ class Analysis:
         return Sequence.from_dict(OrderedDict(zip(first.x, res)))
     
     @staticmethod
+    def convolution(first, second):
+        one = first.y
+        two = second.y
+        n = len(first)
+        m = len(second)
+        conv = []
+        for i in range(n):
+            if i in range(n+m):
+                res = 0
+                for j in range(m+1):
+                    if (i - j) in range(1, n+1):
+                        res += one[i - j] * two[j]
+                conv.append(res)
+            else:
+                conv.append(0)
+        return Sequence.from_func(range(n), lambda x: conv[x])
+
+    @staticmethod
     def dtf(seq):
         n = len(seq)
         y_tmp = seq.y

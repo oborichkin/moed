@@ -16,10 +16,6 @@ class Filter:
         half = Filter._half_filter(size, dt, fc)
         result = [*list(reversed(half)), *half[1:]]
         return Sequence.from_func(range(2*size+1), lambda x: result[x])
-    
-    @staticmethod
-    def high_cut_filter(size, dt, fc):
-        return Filter.low_pass_filter(size, dt, fc)
 
     @staticmethod
     def high_pass_filter(size, dt, fc):
@@ -34,12 +30,34 @@ class Filter:
         return Sequence.from_func(range(2*size+1), lambda x: hpf[x])
     
     @staticmethod
-    def low_cut_filter(size, dt, fc):
-        return high_pass_filter(size, dt, fc)
+    def band_pass_filter(size, dt, fc_low, fc_up):
+        assert fc_low < fc_up
+        return Filter._band_filter(size, dt, fc_low, fc_up)
     
     @staticmethod
-    def band_pass_filter(size, dt, fc):
-        pass
+    def band_select_filter(size, dt, fs_low, fs_up):
+        assert fs_low < fs_up
+        return Filter._band_filter(size, dt, fs_up, fs_low)
+
+    @staticmethod
+    def high_cut_filter(size, dt, fc):
+        return Filter.low_pass_filter(size, dt, fc)
+
+    @staticmethod
+    def low_cut_filter(size, dt, fc):
+        return high_pass_filter(size, dt, fc)
+
+    @staticmethod
+    def _band_filter(size, dt, fc1, fc2):
+        lpf_low = Filter.low_pass_filter(size, dt, fc1).y
+        lpf_up = Filter.low_pass_filter(size, dt, fc2).y
+
+        for i in range(2*size + 1):
+            if i == size:
+                lpf_low[i] = 1 + lpf_low[i] - lpf_up[i]
+            else:
+                lpf_low[i] = lpf_low[i] - lpf_up[i]
+        return Sequence.from_func(range(2*size+1), lambda x: lpf_low[x])
     
     @staticmethod
     def _half_filter(size, dt, fc):
@@ -59,6 +77,8 @@ class Filter:
             arg = (math.pi * i) / size
             for k in range(1, 4):
                 sum_ +=  2 * Filter.P310_WINDOW[k] * math.cos(arg * k)
+            lpw[i] *= sum_
+            sumg += lpw[i] * 2
         # Normalization
         for i in range(size+1):
             lpw[i] /= sumg
