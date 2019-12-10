@@ -45,7 +45,7 @@ class Filter:
 
     @staticmethod
     def low_cut_filter(size, dt, fc):
-        return high_pass_filter(size, dt, fc)
+        return Filter.high_pass_filter(size, dt, fc)
 
     @staticmethod
     def _band_filter(size, dt, fc1, fc2):
