@@ -1,5 +1,6 @@
 import math
 import statistics
+import numpy as np
 from collections import OrderedDict
 
 from moed.model import Sequence
@@ -160,6 +161,18 @@ class Analysis:
         return Analysis.dtf(seq)
     
     @staticmethod
+    def fft(seq):
+        n = len(seq)
+        res = seq.y
+        res = np.fft.fft(res)
+        res = [abs(x) for x in res]
+        return Sequence.from_dict(OrderedDict(zip(seq.x[:n//2], res[:n//2])))
+    
+    @staticmethod
+    def ifft(seq):
+        pass
+    
+    @staticmethod
     def dft_complex(seq):
         res = []
         n = len(seq)
@@ -174,9 +187,23 @@ class Analysis:
             res.append((Re / n, Im / n))
         return res
 
+    @staticmethod
+    def idft(seq):
+        n = len(seq)
+        res = [0] * n
+        y = seq.y
+        for k in range(n):
+            re = 0
+            im = 0
+            for t in range(n):
+                angle = 2 * math.pi * t * k / n
+                re += y[t] * math.cos(angle)
+                im += y[t] * math.sin(angle)
+            res[k] = re + im
+        return Sequence.from_func(range(n), lambda x: res[x])
 
     @staticmethod
-    def idft(complex_pairs):
+    def idft_from_complex(complex_pairs):
         res = []
         n = len(complex_pairs)
         for k in range(n):
