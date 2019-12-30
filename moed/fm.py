@@ -31,8 +31,7 @@ class FM(Sequence):
         self.carrier = Model.harmonic(signal.x, freq=self._carrier_freq)
         self.signal = deepcopy(signal)
 
-        theta = [2 * math.pi * (self._carrier_freq + self._mod * y)
-                 * x + random.random() * noise_intensity - noise_intensity / 2 for x, y in signal._seq.items()]
+        theta = [2 * math.pi * (self._carrier_freq * x + self._mod * y) + random.random() * noise_intensity - noise_intensity / 2 for x, y in signal._seq.items()]
         self.theta = Sequence.from_dict(OrderedDict(zip(signal.x, theta)))
 
         for x, y in self.theta._seq.items():
