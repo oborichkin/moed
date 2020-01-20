@@ -1,5 +1,6 @@
 import math
 import statistics
+import numpy as np
 from collections import OrderedDict
 
 from moed.model import Sequence
@@ -122,6 +123,11 @@ class Analysis:
         return Sequence.from_dict(OrderedDict(zip(first.x, res)))
     
     @staticmethod
+    def convolve(a, v):
+        c = np.convolve(a.y, v.y)
+        return Sequence.from_func(range(len(v), len(a)), lambda x: c[x])
+
+    @staticmethod
     def convolution(first, second):
         one = first.y
         two = second.y
@@ -131,8 +137,8 @@ class Analysis:
         for i in range(n):
             if i in range(n+m):
                 res = 0
-                for j in range(m+1):
-                    if (i - j) in range(1, n+1):
+                for j in range(m):
+                    if (i - j) in range(0, n):
                         res += one[i - j] * two[j]
                 conv.append(res)
             else:
@@ -143,6 +149,7 @@ class Analysis:
     def dtf(seq):
         n = len(seq)
         y_tmp = seq.y
+        x_tmp = seq.x
         res = []
         for k in range(n):
             Re = 0
@@ -153,7 +160,11 @@ class Analysis:
                 Im += y_tmp[t] * math.sin(angle)
             res.append(math.sqrt((Re / n) ** 2 + (Im / n) ** 2))
         
-        return Sequence.from_dict(OrderedDict(zip(seq.x[:n//2:], res[:n//2])))
+        freq_top = 1 / (2 * (x_tmp[1] - x_tmp[0]))
+        freq_delta = 2 * freq_top / n
+        x_tmp = [freq_delta * x for x in range(len(seq.x[:n//2]))]
+
+        return Sequence.from_dict(OrderedDict(zip(x_tmp, res[:n//2])))
     
     @staticmethod
     def dft(seq):

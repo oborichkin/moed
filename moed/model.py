@@ -67,6 +67,11 @@ class Sequence:
         return res
     
     def __mul__(self, other):
+        if isinstance(other, int):
+            res = Sequence()
+            for x, y in self._seq.items():
+                res._seq[x] = y * other
+            return res
         res = Sequence()
         keys = list(set(self.x).union(other.x))
         keys.sort()

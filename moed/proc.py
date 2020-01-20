@@ -30,12 +30,12 @@ class Filter:
         return Sequence.from_func(range(2*size+1), lambda x: hpf[x])
     
     @staticmethod
-    def band_pass_filter(size, dt, fc_low, fc_up):
+    def band_stop_filter(size, dt, fc_low, fc_up):
         assert fc_low < fc_up
         return Filter._band_filter(size, dt, fc_low, fc_up)
     
     @staticmethod
-    def band_select_filter(size, dt, fs_low, fs_up):
+    def band_pass_filter(size, dt, fs_low, fs_up):
         assert fs_low < fs_up
         return Filter._band_filter(size, dt, fs_up, fs_low)
 
